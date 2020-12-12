@@ -1,0 +1,420 @@
+\documentclass[10pt, letterpaper]{article}
+
+\usepackage[utf8]{inputenc}     % ensure UTF-8 encoding is used
+\usepackage[letterpaper, margin=0.5in]{geometry} % document margins, `showframe` will display margins
+\usepackage[english]{babel}
+\usepackage{times}              % Times New Roman font-family
+\usepackage{microtype}          % prevent LaTeX from fusing characters into ligatures, e.g. "fi" becoming one character
+% \usepackage[compact]{titlesec}
+\usepackage{multicol}           % multicolumns usage: \begin{multicols}{#} ... \end{multicols}
+                                % minipage for declaring column widths, multicols for equal widths
+\usepackage{float}              % prevent tables from being moved outside their section using [H]
+\usepackage{enumitem}           % custom itemize/enumerate styles
+\usepackage[hidelinks, pdfpagemode=UseNone, pdfstartview=FitH]{hyperref}
+                                    % Create bookmarks, hide link outlines, start with bookmark
+                                    % pane closed
+                                    % make default PDF-opening view fit full width
+\usepackage{makecell}           % multiline table cells
+\usepackage{ifthen}             % boolean expressions
+\usepackage{tikz}               % \foreach command for looping through args
+
+
+%-------------------Formatting-------------------%
+
+% Command             10pt    11pt    12pt
+% \tiny               5       6       6
+% \scriptsize         7       8       8
+% \footnotesize       8       9       10
+% \small              9       10      10.95
+% \normalsize         10      10.95   12
+% \large              12      12      14.4
+% \Large              14.4    14.4    17.28
+% \LARGE              17.28   17.28   20.74
+% \huge               20.74   20.74   24.88
+% \Huge               24.88   24.88   24.88
+
+% Remove page numbering from all pages
+\pagenumbering{gobble}
+
+% Pages use \flushbottom by default to force all pages to have the same vertical ending location.
+% This results in pages that don't fill the entire vertical space on the page to spread their content
+% evenly to fill it instead of spacing content normally
+\raggedbottom                   % allow page content to end wherever it wants
+
+% Only disable ligatures for "f" so that -- can be dash, double quotes can be a single character, etc.
+\DisableLigatures[f]{encoding=*, family=*}
+
+% \setlength{\parskip}{0em}            % space between paragraphs and \\
+
+% Change default \(sub(sub))section styling.
+% Define new functions since \usepackage{titlesec} doesn't support \tableofcontents (see: https://tex.stackexchange.com/a/56025/164369).
+% This unfortunately removes the ability to see the sections in "Bookmarks" tab of PDF readers, but it's only one page
+% so this is acceptable
+%
+% Attempts were made, but exact formatting for what I wanted could not be obtained.
+% These are the titlesec notes taken during attempts
+%
+% \titleformat{command}{font alterations}{display}{not sure}{before-text display, e.g. numbering}
+%
+% \titleformat{\section}{\normalfont\Large\bfseries}{
+%     \noindent \textbf{\Large \thesection}
+%     \hr
+% }{1em}{}
+%
+% \titlespacing{command}{left spacing}{before spacing}{after spacing}[right]
+% \titleformat{\section}{\Large}{\thesection}{*0}{}
+% \titlespacing*{\section}{0pt}{*0}{*0}
+
+
+\newcommand{\ressection}[2][12.5]{
+    \vspace{#1pt} % default to adding 10pt of space above section title
+    \noindent {\Large \ #2}
+    \vspace{0pt}
+    \hr
+}
+
+\newcommand{\ressubsection}[4][]{
+    % \parbox is the same as minipage, just with simpler syntax
+    % that doesn't allow for some commands/styles to be used inside it.
+    % \ragged(side) floats text to that side. Use \centering for centered text
+    \vspace{8pt}
+    \noindent
+    \parbox[c]{.8\textwidth}{
+        % large, underlined title with languages in parentheses
+        % insert extra space (&nbsp;) to slightly indent title
+        \raggedright \ \underline{\large #2} \ (#3) \
+        \ifthenelse
+            {\equal{#1}{}} % add <URL> if optional #1 != null
+            {}
+            {\small{$<$\url{#1}$>$}}
+    }
+    % total width of both parboxes needs to be < 1
+    \parbox[c]{.19\textwidth}{
+        % dates floated to the right
+        \raggedleft (#4)
+    }
+}
+
+
+% Remove extra space between \underline and text
+\let\oldunderline\underline
+\renewcommand{\underline}[1]{\oldunderline{\smash{#1}}}
+
+
+% make URLs font and size the same as regular text
+\urlstyle{same}
+% Overwrite old \url command to underline it (since `hidelinks` is active in hyperref)
+\let\oldurl\url
+\renewcommand{\url}[1]{\oldunderline{\oldurl{#1}}}
+
+
+% enumitem package:
+% Global:
+%   Remove separation between lists and the outside world
+%   Remove separation between items within lists
+%   Make each level of indention equal to what indenting a paragraph
+%     would be (0 for first level, 1 par indent for second level, etc)
+\setlist[itemize]{nosep, noitemsep, leftmargin=\parindent}
+% Local:
+%   Make second-level bullet style circles instead of dashes
+\setlist[itemize,2]{label=$\circ$}
+
+%-----------------------COMMANDS-----------------------%
+%\newcommand{name}[number of args][default for optional]{definition}
+
+\newcommand{\email}[1]{
+    \underline{\href{mailto:#1}{#1}}
+}
+
+\newcommand{\tab}[3][|r|l|]{
+    % [1] = Border style/format of table columns
+    %  2  = Title
+    %  3  = Table content
+    {   % extra bracket in order to group the \centering content
+        \begin{table}[H] %[H] means put table here, not where it fits best
+        \caption*{\textbf{#2}}
+        \vspace{-0.3cm} % remove extra space after caption
+        \centering
+        \begin{tabular}{#1}%
+        \hline
+        #3
+        \end{tabular}
+        \end{table}
+    }
+}
+
+% Use minipage to make multi-column entries of specified widths.
+% Usage:
+%   \colswidthsof{
+%       .3/{
+%           Column 1 content
+%       },
+%       .7/{
+%           Column 2 content
+%       }
+%   }
+\newcommand{\colswidthsof}[1]{
+    \foreach \w/\x in {#1} {
+        \begin{minipage}[t]{\w\textwidth}
+        \setlength{\parskip}{5cm}
+        \centering
+        \x
+        \end{minipage}
+    }
+}
+
+% Attempts at making \colswidthsof more user friendly by extracting widths to separate parameter
+% \newcommand{\colsattempt}[2][]{
+    % TODO find out how to get items from optional #1 array
+    % \foreach \z in {#1} {
+    % \z \y \\ % requires newline b/c minipage requires newline to make new rows
+
+    % \foreach \w/\x in {#1/2} {
+    %     \begin{minipage}[c]{.3\linewidth}
+    %     \centering
+    %     \x
+    %     \end{minipage}
+    % }
+
+    % \foreach \w in {#1} {
+    %     \begin{minipage}[c]{\w\linewidth}
+    %     \centering
+
+    %     \foreach \x in {#2} {
+    %         \w \x
+    %     }
+
+    %     \end{minipage}
+    % }
+
+    % \newforeach[expand list] \x in {#1,2} {
+    %     \begin{minipage}[c]{0.3\linewidth}
+    %     \centering
+
+    %     \x
+
+    %     \end{minipage}
+    % }
+% }
+
+% Usage:
+% \colsattempt[.3,.3,.4]{
+%     {
+%         Column 1 content
+%     },
+%     {
+%         Column 2 content
+%     },
+%     {
+%         Column 3 content
+%     }
+% }
+
+% Unordered lists
+\newcommand{\ul}[1]{%
+    \begin{itemize}%
+    #1%
+    \end{itemize}%
+}
+
+% Ordered lists
+\newcommand{\ol}[1]{%
+    \begin{enumerate}%
+    #1%
+    \end{enumerate}%
+}
+
+% Quotes
+\newcommand{\q}[1]{``#1''}
+
+% Tilde
+\def\t{$\sim$}
+
+% Horizontal line spreading the page width within margins
+\def\hr{
+    % Per https://tex.stackexchange.com/questions/421791/preventing-letters-with-descenders-g-q-y-from-affecting-line-spacing
+    % remove extra vspace being added due to characters with descenders,
+    % e.g. "g", "y", "p", etc. that go below the normal bottom line of text.
+    % Other possible way of doing this: \noindent\rule{\textwidth}{.5pt}
+    \par\kern-\prevdepth\vspace{3pt}
+    \hrule
+    \vspace{2pt}
+}
+
+% Link to parts of this article tagged with \label{name}
+\newcommand{\secref}[1]{\underline{\nameref{#1}}}
+
+
+
+
+
+\begin{document}
+
+\vspace{-1\multicolsep}
+\begin{multicols}{3}
+\noindent
+\centering
+
+\email{djp460@nyu.edu} \\
+(+1) 321-356-5260
+
+\columnbreak
+
+\textbf{\LARGE Devon Powell} \\
+\url{http://devonpowell.net}
+
+\columnbreak
+
+\url{https://github.com/D-Pow} \\
+\url{https://linkedin.com/in/devon-powell/}
+\end{multicols}
+\vspace{-1\multicolsep}
+
+
+
+\ressection[6]{Skills}
+
+\noindent Languages (ranked 5 $>$ 1)
+\par
+JavaScript (5), \ Java (4), \ HTML (3), \ CSS (3), \ Python (3), \ SQL (2), \ PHP (1), \ LaTeX (1).
+
+\noindent Technical Skills
+\par
+Git, \ React, \ MobX, \ Spring, \ Regex, \ Webpack, \ Bash, \ Bootstrap, \ Jest, \ Gradle, \ JUnit, \ Maven, \ SQLite, \ Oracle DB, \ Linux,
+\par
+Agile (Scrum), \ BitBucket, \ Jira, \ CI/CD (Jenkins, Travis), \ GitHub, \ Heroku, \ Docker, \ Google Cloud, \ Automation Testing.
+
+
+
+\ressection{Employment}
+
+\ressubsection{E-Trade Full-stack Software Engineer}{JavaScript, Java, Python}{July 2018 -- Present}
+
+\ul{
+    \item \textbf{Mediated company-wide network issues} in personal time via \underline{MockRequests} (see Open-source below).
+
+    \ul{
+        \item \textbf{Removed largest front-end blocker} in the company: server rolls occurring twice per week that disable all API endpoints.
+
+        \item Used across many teams and projects; \textbf{improved developer productivity by 40\%}.
+
+        \item Allowed any data-driven JavaScript development to continue unfazed regardless of environment conditions.
+    }
+
+    \item Built a pre-market dashboard for analyzing internal systems/servers before markets open (July -- Dec 2018) -- Python/jQuery.
+
+    \ul{
+        \item Proposed \textbf{new architectural direction} to enhance data flow, improve readability, and reduce technical debt.
+
+        \item \textbf{Took ownership} of architecture design, implementation, and successful production rollout.
+    }
+
+    \item Build 2 platforms for creating mutual fund investment plans -- React SPA/MobX/MVVM/Spring/Oracle DB.
+
+    \ul{
+        \item \q{Prebuilt Portfolios} that brought in \textbf{\$2.5 million in its first year} of release.
+
+        \item \q{Automatic Investing} that resulted in a \textbf{37\% growth} of mutual fund purchases and \textbf{15\% growth} in new customers.
+
+        \item \textbf{Improved client performance by 50\%} through restructuring state management and render logic.
+
+        \item Refactored legacy React components to be highly reusable, customizable, and specific to individual use cases.
+
+        \item Enhanced server endpoints by updating data aggregation logic, simplifying client-server communications.
+    }
+
+    \item \textbf{Foster a culture of learning and growth} in the organization's developer community.
+
+    \ul{
+        \item \textbf{Primary mentor for onboarding all new hires}, including meetings for teaching git, libraries, and development stack.
+
+        \item \textbf{Optimize team productivity} by writing/sharing scripts for automating tasks, including allowing use of local IDEs to code on remote servers, remote file exchanges, Jira ticket autocompletion in git, cookie extraction/refresh during development, etc.
+
+        \item \textbf{Inspire deeper collaboration} across various Slack channels, leading to improvements in coding practices.
+    }
+}
+
+\ressubsection[play.google.com/store/apps/details?id=com.etrade.mobilepro.activity]{E-Trade Internship}{Java/Android}{June -- Aug. 2017}
+
+\ul{
+    \item Developed a panel widget for Edge devices that displayed a user's watch lists, each containing its own set of stocks.
+
+    \item Involved UI/UX design, authentication, state management, caching, and testing (JUnit).
+
+    \item \textbf{Took responsibility for a seamless hand-off} by writing extensive documentation and applying good source control practices.
+}
+
+
+
+\ressection{Open-source}
+
+\ressubsection[https://www.npmjs.com/package/mock-requests]{MockRequests}{JavaScript}{Sept. 2019}
+% \phantomsection \label{MockRequests}
+\ul{
+    \item Highly user-friendly JavaScript network-mocking library, with features \textbf{most other solutions don't provide}.
+
+    \item Provides a simple, one-stop-shop configuration, with \textbf{no need to change source code} or run local servers.
+
+    \item Features: dynamic mocks based on payload/query parameters, response delays, and cross-browser functionality.
+}
+
+
+
+\ressection{Projects}
+
+\ressubsection[https://github.com/D-Pow/anime-atsume]{Anime Atsume}{Java, JavaScript}{June -- July 2020}
+
+\ul{
+    \item Anime search engine providing the \textbf{quickest possible path} from searching titles to watching episodes, unlike most other sites.
+
+    \item Full-stack: \textbf{SPA React} front-end, \textbf{Spring Boot} back-end, \textbf{Docker} container, \textbf{Heroku} host.
+}
+
+\ressubsection[www.atomsofconfusion.com]{Research -- Atoms of Confusion}{C, PHP, HTML/CSS}{Aug. 2016 -- May 2018}
+
+\ul{
+    \item Determined code patterns that are objectively confusing, with implications for \textbf{improving design principles and specifications}.
+}
+
+
+
+\ressection{Education}
+
+\vspace{-1\multicolsep} % remove extra space multicols introduces before its environment
+\begin{multicols}{2}
+\noindent
+\raggedright
+
+\textbf{NYU Tandon School of Engineering} \ -- \ GPA: 3.8/4.0
+\underline{Master of Science in Computer Science} (May 2018) Brooklyn, NY
+
+\columnbreak
+
+\textbf{New College of Florida, the State's Honors College}
+\underline{Bachelor of Arts in Chemistry} (May 2016) Sarasota, FL
+
+\end{multicols}
+\vspace{-1\multicolsep} % remove extra space multicols introduces after its environment
+
+
+\ressection{Additional Relevant Activities}
+
+\vspace{-1\multicolsep}
+\begin{multicols}{2}
+\noindent
+
+\ul{
+    \item \textbf{Eagle Scout} (2011): Highest rank, top 2\% of all Boy Scouts.
+    \item \textbf{Cyber Security Club} (Sept. 2016 -- May 2017).
+}
+
+\columnbreak
+
+\ul{
+    \item \textbf{NYU Healthcare Hackathon Winner} (Nov. 2016).
+    \item \textbf{Japanese} (2019 -- Present): Approaching N5 fluency.
+}
+\end{multicols}
+\vspace{-1\multicolsep}
+
+\end{document}

@@ -99,7 +99,7 @@
     \parbox[c]{.8\textwidth}{
         % large, underlined title with languages in parentheses
         % insert extra space (&nbsp;) to slightly indent title
-        \raggedright \ \underline{\large #2} \ (#3) \
+        \raggedright \ \underline{\phantomsection \large #2 \label{#2}} \ (#3) \
         \ifthenelse
             {\equal{#1}{}} % add <URL> if optional #1 != null
             {}
@@ -258,8 +258,10 @@
     \vspace{2pt}
 }
 
-% Link to parts of this article tagged with \label{name}
+% Link to sections of this article tagged with \label{name}
 \newcommand{\secref}[1]{\underline{\nameref{#1}}}
+% Link to non-sections of this article tagged with \phantomsection
+\newcommand{\nonsecref}[1]{\hyperref[#1]{\underline{#1}}}
 
 
 
@@ -308,7 +310,7 @@ Agile (Scrum), \ BitBucket, \ Jira, \ CI/CD (Jenkins, Travis), \ GitHub, \ Herok
 \ressubsection{E-Trade Full-Stack Software Engineer - Senior Analyst}{JavaScript, Java, Python}{July 2018 -- Present}
 
 \ul{
-    \item \textbf{Mediated company-wide network issues} in personal time via \underline{MockRequests} (see Open-source below).
+    \item \textbf{Mediated company-wide network issues} in personal time via \nonsecref{MockRequests} (see Open-source below).
 
     \ul{
         \item \textbf{Removed largest front-end blocker} in the company: server rolls occurring twice per week that disable all API endpoints.
@@ -366,7 +368,7 @@ Agile (Scrum), \ BitBucket, \ Jira, \ CI/CD (Jenkins, Travis), \ GitHub, \ Herok
 \ressection{Open-source}
 
 \ressubsection[https://www.npmjs.com/package/mock-requests]{MockRequests}{JavaScript}{Sept. 2019}
-% \phantomsection \label{MockRequests}
+
 \ul{
     \item Highly user-friendly JavaScript network-mocking library, with features \textbf{most other solutions don't provide}.
 

@@ -131,10 +131,11 @@
 %   Remove separation between items within lists
 %   Make each level of indention equal to what indenting a paragraph
 %     would be (0 for first level, 1 par indent for second level, etc)
-\setlist[itemize]{nosep, noitemsep, leftmargin=\parindent, label={\large\textbullet}}
+\setlist[itemize]{nosep, itemsep=2pt, leftmargin=\parindent, label={\large\textbullet}}
 % Local:
-%   Make second-level bullet style circles instead of dashes
-\setlist[itemize,2]{label={\large$\circ$}}
+%   Customize second-level bullet styles
+\setlist[itemize,2]{label={\textbf{--}}}
+% \setlist[itemize,2]{label={\large$\circ$}}
 
 %-----------------------COMMANDS-----------------------%
 %\newcommand{name}[number of args][default for optional]{definition}
@@ -352,6 +353,8 @@ Agile (Scrum), \ BitBucket, \ Jira, \ CI/CD (Jenkins, Travis), \ GitHub, \ Herok
         \item \textbf{Inspire deeper collaboration} across various Slack channels, leading to improvements in coding practices.
     }
 }
+
+\vspace{1pt}
 
 \ressubsection[play.google.com/store/apps/details?id=com.etrade.mobilepro.activity]{E-Trade Internship}{Java/Android}{June -- Aug. 2017}
 

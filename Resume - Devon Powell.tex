@@ -245,6 +245,12 @@
 % Quotes
 \newcommand{\q}[1]{``#1''}
 
+% Code - Inline
+% See:
+%   - https://tex.stackexchange.com/a/257615
+%   - https://tex.stackexchange.com/questions/46880/in-the-minted-package-how-do-i-enforce-straight-single-quotes
+\newcommand{\code}[1]{\small{\texttt{#1}}}
+
 % Tilde
 \def\t{$\sim$}
 
@@ -319,7 +325,7 @@
         \item Laid out instructions/metrics for transitioning from a monolithic structure to micro-frontends.
     }
 
-    % \item Upgraded website to core-js 3.
+    % \item Upgraded website from \code{core-js@v2} to \code{core-js@v3}.
     % \item Enhance developer experience through tooling improvements, code organization, feature modernization, and leading the move from JavaScript to TypeScript.
 }
 

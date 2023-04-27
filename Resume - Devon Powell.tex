@@ -12,6 +12,44 @@
 %   % Only disable ligatures for "f" so that -- can be dash, double quotes can be a single character, etc.
 %   \DisableLigatures[f]{encoding=*, family=*}
 
+\usepackage{textcomp}           % Add `\textquotesingle` and `\textquotedbl` for straight quotation marks
+
+% Replacing all curly quotation marks with straight ones is surprisingly difficult
+% due to their usage in different environments (e.g. math `$f(x)' = dx$`) and meanings
+% in different commands (e.g. default quote behavior using `quoted-text').
+% Double-quotes can be solved with some packages (`upquote` + `textcomp`),
+% but there aren't any for single-quotes.
+%
+% Because of this, we could either:
+%   - Wrap the whole `\begin{document}` in a new command:
+%       \newcommand\usestraightquotes{%
+%           \begingroup\lccode`~=`'
+%           \lowercase{\endgroup\let~}\textquotesingle
+%           \catcode`'=\active
+%       }
+%     which errors in math environments (i.e. `$f(x)' = dx$`).
+%   - Use `\begin{verbatim}` environment (verbose for conjunctions).
+%   - Use a regex replace (would interfere with math envs to make quotes not work).
+%   - Redefining the `'` symbol (would cause all of the above).
+%
+% See:
+%   - Closest to the answer (see answer with `\lccode`): https://tex.stackexchange.com/questions/436308/changing-all-single-quotes-to-be-straight-when-within-texttt
+%   - General straight-quotes question: https://tex.stackexchange.com/questions/52529/straight-quotes
+%   - Regex replace before compilation:
+%       - https://tex.stackexchange.com/questions/534581/tex-compilation-after-regex-replace
+%       - `stringstrings` package: https://tex.stackexchange.com/questions/185682/command-which-replaces-all-occurrences-of-a-certain-character-with-another-chara/185687#185687
+%           \newcommand{\replaceChar}[3]{\convertchar{#3}{#1}{#2}}
+%           \newcommand{\replaceSingleQuotes}[1]{\replaceChar{'}{\textquotesingle}{#1}}
+%           \newcommand{\replaceDoubleQuotes}[1]{\replaceChar{"}{\textquotedbl}{#1}}
+%   - Regex replace in environment: https://tex.stackexchange.com/questions/574473/replace-a-string-inside-an-environment
+%   - `upquote` package: https://stackoverflow.com/questions/1662037/how-to-write-programming-code-containing-the-character-in-latex
+%   - Changing font for only a single character: https://tex.stackexchange.com/questions/531615/switch-font-for-one-character-in-xelatex
+%   - Attempting Unicode replace (doesn't work due to quotes being ASCII): https://tex.stackexchange.com/questions/400955/add-unicode-character-to-document
+%   - `listings` package: https://stackoverflow.com/questions/432349/how-do-you-display-straight-quotes-instead-of-curly-quotes-when-using-latexs-l
+%   - `mint` package: https://tex.stackexchange.com/questions/46880/in-the-minted-package-how-do-i-enforce-straight-single-quotes
+%   - `microtype` package.
+%   - Redefining symbols: https://tex.stackexchange.com/questions/279772/how-to-redefine-the-plus-symbol
+
 % \usepackage[compact]{titlesec}
 \usepackage{multicol}           % multicolumns usage: \begin{multicols}{#} ... \end{multicols}
                                 % minipage for declaring column widths, multicols for equal widths

@@ -3,8 +3,15 @@
 \usepackage[utf8]{inputenc}     % ensure UTF-8 encoding is used
 \usepackage[letterpaper, margin=0.5in]{geometry} % document margins, `showframe` will display margins
 \usepackage[english]{babel}
-\usepackage{times}              % Times New Roman font-family
-\usepackage{microtype}          % prevent LaTeX from fusing characters into ligatures, e.g. "fi" becoming one character
+\usepackage{mathptmx}           % Times New Roman font-family (`\usepackage{times}` is obsolete)
+
+\usepackage{cmap}               % cmap and the T1 font prevent LaTeX from fusing characters
+\usepackage[T1]{fontenc}          % into ligatures, e.g. "fi" becoming one character
+% Alternative:
+%   \usepackage{microtype}
+%   % Only disable ligatures for "f" so that -- can be dash, double quotes can be a single character, etc.
+%   \DisableLigatures[f]{encoding=*, family=*}
+
 % \usepackage[compact]{titlesec}
 \usepackage{multicol}           % multicolumns usage: \begin{multicols}{#} ... \end{multicols}
                                 % minipage for declaring column widths, multicols for equal widths
@@ -57,9 +64,6 @@
 % This results in pages that don't fill the entire vertical space on the page to spread their content
 % evenly to fill it instead of spacing content normally
 \raggedbottom                   % allow page content to end wherever it wants
-
-% Only disable ligatures for "f" so that -- can be dash, double quotes can be a single character, etc.
-\DisableLigatures[f]{encoding=*, family=*}
 
 % \setlength{\parskip}{0em}            % space between paragraphs and \\
 

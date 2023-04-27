@@ -470,17 +470,19 @@
 
 \vspace{2pt} % add some amount of \vspace like \ressubsection does
 \vspace{-1\multicolsep} % remove extra space multicols introduces before its environment
+% Set column separation width by wrapping `multicols` environment in:
+% {\setlength\columnsep{7pt}
 \begin{multicols}{2}
 \noindent
 \raggedright
 
 \textbf{NYU Tandon School of Engineering} \ -- \ GPA: 3.8/4.0
-\underline{Master of Science in Computer Science} (May 2018) Brooklyn, NY
+\underline{Master of Science in Computer Science} (May 2018) {\small Brooklyn, NY}
 
 \columnbreak
 
 \textbf{New College of Florida, the State's Honors College}
-\underline{Bachelor of Arts in Chemistry} (May 2016) Sarasota, FL
+\underline{Bachelor of Arts in Chemistry} (May 2016) {\small Sarasota, FL}
 
 \end{multicols}
 % \vspace{-1\multicolsep} % remove extra space multicols introduces after its environment

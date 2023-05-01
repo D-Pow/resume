@@ -62,6 +62,10 @@
 \usepackage{makecell}           % multiline table cells
 \usepackage{ifthen}             % boolean expressions
 \usepackage{tikz}               % \foreach command for looping through args
+\usepackage{expl3}              % Adds ability to parse `:`, `_`, etc. as letters for function/variable names (see: `\ExplSyntaxOn` below)
+\usepackage{xparse}             % Adds ability to make functions with multiple optional params + named params
+                                    % Docs: https://texdoc.org/serve/xparse/0
+\usepackage{xstring}            % Adds `\StrSubstitute` command for (non-regex) text replacement
 
 
 %-------------------Formatting-------------------%
@@ -164,7 +168,108 @@
 \urlstyle{same}
 % Overwrite old \url command to underline it (since `hidelinks` is active in hyperref)
 \let\oldurl\url
-\renewcommand{\url}[1]{\oldunderline{\oldurl{#1}}}
+% Allows `:`, `_`, and some other chars to be recognized as "letters" in function
+% and variable names, which is required for `\tl_X`, `\cs_X`, `\regex_X`, etc.
+% See:
+%   - https://tex.stackexchange.com/questions/108696/what-do-explsyntaxon-and-explsyntaxoff-do
+\ExplSyntaxOn
+% Use `xparse` enhanced `\renewcommand` to make arg-parsing easier for
+% asterisk, multiple optional args, multiple mandatory ones, etc.
+%
+% See:
+%   - https://tex.stackexchange.com/questions/422765/overloading-command-parameters-in-latex
+%   - https://www.texdev.net/2010/05/23/from-newcommand-to-newdocumentcommand
+%   - Special commands in LaTeX: https://doxygen.nl/manual/commands.html
+\RenewDocumentCommand{\url}{s O{} m} {{%
+    % Note: Though we extract the args to named "vars" here,
+    % they won't work in commands that require the raw types,
+    % e.g. `\IfBooleanTF{}` because those types of commands will see the
+    % type as `\def` (which is basically a function) but will see the correct
+    % type if using the arg directly.
+    \def\hideProtocol{#1}
+    \def\displayString{#2}
+    \def\urlString{#3}
+
+    % Default the displayed text to that of the URL.
+    % `\IfNoValueTF` didn't work here for some reason, not exactly sure why, but
+    % it would register as True even if the value was blank.
+    % Maybe it's because of `\def` instead of reading the raw value directly?
+    \ifthenelse
+        {\equal{\displayString}{}}
+        {\edef\displayString{\urlString}}
+        {}
+
+    % If a `\url` call is accidentally passed into another `\url` call (e.g.
+    % due to nested/multiple wrapper util commands), then strip out the URL
+    % from it and don't call the nested `\url`.
+    %
+    % See:
+    %   - https://tex.stackexchange.com/questions/534581/tex-compilation-after-regex-replace
+    \regex_match:nnTF
+        {\c{url}[^\{]*\{}  % `\c{regex}` matches a command call by name
+        {#3}
+        {%
+            % Overwrite `\displayString` with that of nested `\url[DisplayString]`
+            % if it exists
+            \regex_replace_once:nnN {\c{url}\s*\[(.*)\]\s*\{.*} {\1} \displayString
+            \regex_replace_once:nnN {\c{url}[^\{]*\{(.*)\}\s*$} {\1} \urlString
+        }
+        {}%
+
+
+    % Must use `\let` instead of `\def` because `\def` is more of a pointer
+    % than `\let` and will change its output if the containing code block
+    % changes the value of the var it was pointing to.
+    %
+    % In other words, we use `\let` to get the value of the var as it is now
+    % since the call here is possibly executed way later (since
+    % LaTeX, unlike other programming languages, doesn't actually execute code
+    % in the same order it was called, but rather in order of when the display
+    % of that code is ready to be made).
+    %
+    % Also, this lets us feign the "correct" method of doing this, which is
+    %   `\tl_set:Nn \urlProtocolRemoved { \urlString }`
+    % because `\let` makes a "true" variable whereas `\def` does not.
+    %
+    % See:
+    %   - `\def` vs `\newcommand`: https://tex.stackexchange.com/a/658
+    %   - `\def` vs `\let`: https://tex.stackexchange.com/questions/258/what-is-the-difference-between-let-and-def
+    %   - `\def` scoping: https://tex.stackexchange.com/q/518894
+    %   - Declaring local variables: https://tex.stackexchange.com/a/14411
+    %   - Redefining with `\edef`: https://tex.stackexchange.com/a/592344
+    \let\urlProtocolRemoved\urlString
+    % Alternative:
+    %   \StrSubstitute[0]{Text should be replaced here, here and here}{here}{Latex}
+    % See:
+    %   - Regex replace example: https://tex.stackexchange.com/questions/534581/tex-compilation-after-regex-replace/534589#534589
+    %   - `\tl_set` usage: https://tex.stackexchange.com/questions/578870/what-is-the-difference-between-tl-setnn-and-cs-setnpn/578874#578874
+    %   - https://tex.stackexchange.com/a/213951
+    \regex_replace_all:nnN {\w+\:\/\/} {} \urlProtocolRemoved
+
+    \ifthenelse
+        {\equal{\displayString}{\urlString}}
+        {\IfBooleanT
+            {#1} % Again, can't use `\def` vars, must use raw vars directly
+            {%
+                % Use `\edef` to evaluate the new value immediately rather than
+                % waiting until when it's executed later (which could be after
+                % this command exits) to prevent endless loops
+                \edef\displayString{\urlProtocolRemoved}
+            }%
+        }
+        {}
+
+
+    % `\url` and `\href` are similar except that `\href` allows setting display text
+    % See:
+    %   - https://tex.stackexchange.com/questions/51267/difference-between-pdf-code-produced-by-href-and-url/51293#51293
+    \href
+        {\urlString}
+        {\oldunderline{%
+            \displayString
+        }}%
+}}
+\ExplSyntaxOff
 
 
 % enumitem package:

@@ -130,6 +130,26 @@
 % \titlespacing*{\section}{0pt}{*0}{*0}
 
 
+\newboolean{debug}
+\setboolean{debug}{true}
+\NewDocumentCommand{\console}{s m}{{%
+    \ifthenelse
+        {\boolean{debug}}
+        {\IfBooleanTF
+            {#1}
+            {%
+                \typeout{}%
+                \typeout{#2}%
+                \typeout{}%
+            }
+            {%
+                \typeout{#2}%
+            }%
+        }
+        {}%
+}}
+
+
 \newcommand{\ressection}[2][12.5]{
     \vspace{#1pt} % option to add an amount of space above section title
     \noindent {\LARGE \ \textbf{#2}}
